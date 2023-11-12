@@ -10,7 +10,7 @@ greenColour="\e[0;32m\033[1m"
 
 tput civis #Oculta el cursor, por estética
 
-echo -e "\nBienvenida al examen de DNS :p"
+echo -e "\n ${redColour}[+]${endColour}${grayColour}Bienvenida al examen de DNS :p ${endColour}\n"
 sleep 2
 
 # Funcion para el ctrl+c (no tengo mucha paciencia)
@@ -35,9 +35,9 @@ echo -e "\n Actualizando el sistema..."
 apt update -y &>/dev/null # Redirijo la salida estandar al /dev/null
 
 if [ $? -eq 0 ]; then
-	echo -e "\n ${greenColour}[+]${endColour}${grayColour}Actualización completada ${endColour}"
+	echo -e "\n ${greenColour}[+]${endColour}${grayColour}Actualización completada ${endColour}\n"
 else
-	echo -e "\n ${redColour}[-]${endColour}${grayColour}Actualización fallida :( ${endColour}"
+	echo -e "\n ${redColour}[-]${endColour}${grayColour}Actualización fallida :( ${endColour} \n"
 fi
 
 sleep 2
@@ -46,9 +46,9 @@ echo -e "\n Instalando paquetes..."
 apt install bind9 bind9utils -y &>/dev/null
 
 if [ $? -eq 0 ]; then
-	echo -e "\n${greenColour}[+]${endColour} ${grayColour}Servicio instalado :) ${endColour}"
+	echo -e "\n${greenColour}[+]${endColour}  ${grayColour}Servicio instalado :) ${endColour}\n"
 else
-	echo -e "\n${redColour}[-]${endColour} ${grayColour}Servicio no instalado ${endColour}"
+	echo -e "\n${redColour}[-]${endColour}  ${grayColour}Servicio no instalado ${endColour}\n"
 fi
 
 sleep 2
@@ -59,7 +59,23 @@ sleep 2
 
 echo -e "\nVamos con la configuración del bashrc \n"
 
-echo 'export PS1="\e[01;31m Rocío del Pilar \e[01;35m \D{%A %e %B %G %R} \e[00;31m \n\[\033[01;32m\][\u@\h\[\033[01;37m\] \W\[\033[01;32m\]]\$\[\033[00m\]"' >> /home/usuario/.bashrc
+tput cnorm
+get_user_stdin() {
+	read -p "$1: " user_stdin
+	echo "$user_stdin"
+}
+
+# Nombre para el bashrc
+user_name=$(get_user_stdin "Introduce tu nombre para el usuario")
+root_name=$(get_user_stdin "Introduce tu nombre para root")
+
+# Declaro una variable para la última linea del bashrc y así sustituir después
+user_file="/home/usuario/.bashrc"
+root_file="/root/.bashrc"
+
+# Sustituyo con sed la última línea actual por la nueva
+
+echo -e 'export PS1="\e[01;31m ${user_name} \e[01;35m \D{%A %e %B %G %R} \e[00;31m \n\[\033[01;32m\][\u@\h\[\033[01;37m\] \W\[\033[01;32m\]]\$\[\033[00m\]"' >> /home/usuario/.bashrc
 source /home/usuario/.bashrc
 if [ $? -eq 0 ]; then
 	echo -e "\n${greenColour}[+]${endColour}${GrayColour}Documento del usuario cambiado${endColour}"
@@ -69,7 +85,7 @@ fi
 
 sleep 2
 
-echo 'export PS1="\e[01;31m Rocío del Pilar root \e[01;35m \D{%A %e %B %G %R} \e[00;31m \n\[\033[01;32m\][\u@\h\[\033[01;37m\] \W\[\033[01;32m\]]\$\[\033[00m\]"' >> /root/.bashrc
+echo -e 'export PS1="\e[01;31m ${root_name} \e[01;35m \D{%A %e %B %G %R} \e[00;31m \n\[\033[01;32m\][\u@\h\[\033[01;37m\] \W\[\033[01;32m\]]\$\[\033[00m\]"' >> /root/.bashrc
 source /root/.bashrc
 if [ $? -eq 0 ]; then
 	echo -e "\n${greenColour}[+]${endColour}${GrayColour}Documento del admin cambiado ${endColour}"
@@ -77,11 +93,6 @@ else
 	echo -e "\n${redColour}[-]${endColour}${GrayColour}No se ha podido modificar el archivo${endColour}"
 fi
 
-# Función para manejar el input del usuario almacenándolo en la variable user_stdi
-get_user_stdin() {
-	read -p "$1: " user_stdin
-	echo "$user_stdin"
-}
 
 # Configuración de IP
 
@@ -121,13 +132,3 @@ if [ $? -eq 0 ]; then
 else
 	echo -e "\n${redColour}[!]${endColour} ${grayColour} Algo salió mal... ${endColour}\n"
 fi
-
-# Por último, modificamos la fuente a una más grande
-
-echo "Haciendo los últimos cambios en la fuente..."
-
-sed 's\8x16\16x32\g' /etc/default/console-setup
-sed 's\Fixed\Terminus\g' /etc/default/console-setup
-update-initramfs -u
-
-echo -e "\n${greenColour}[+]${endColour} ${grayColour}Configuración terminada${endColour}"
